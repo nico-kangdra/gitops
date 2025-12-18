@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test-lib
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/nico-kangdra/gitops.git
+      targetRevision: main
+      path: test-lib
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nickstaging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - Replace=true

@@ -1,0 +1,67 @@
+
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: kpp
+  namespace: nickstaging
+spec:
+  parentRefs:
+    - name: external-gateway
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - "kang.nickeverest.site"
+  rules:
+    - backendRefs:
+        - group: ""
+          kind: Service
+          name: nicklibrary-service-staging
+          port: 3000
+      matches:
+        - path:
+            type: PathPrefix
+            value: /
+      sessionPersistence:
+        sessionName: cookie_affinity
+        type: Cookie
+        absoluteTimeout: 3600s
+        cookieConfig:
+          lifetimeType: Permanent
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            remove:
+              - X-Frame-Options
+              - Content-Security-Policy
+            set:
+              - name: X-Frame-Options
+                value: "SAMEORIGIN"
+              - name: X-XSS-Protection
+                value: "1; mode=block"
+              - name: X-Content-Type-Options
+                value: "nosniff"
+              - name: Referrer-Policy
+                value: "strict-origin-when-cross-origin"
+              - name: Strict-Transport-Security
+                value: "max-age=31536000; includeSubDomains"
+              - name: Permissions-Policy
+                value: 'camera=(self "https://id-production-cdn.zoloz.com" "https://vbuat.cimbniaga.co.id:8443")'
+              - name: Cache-Control
+                value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+              - name: Content-Security-Policy
+                value: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://www.cimbniaga.co.id https://octo-connect-non-prod.s3.ap-southeast-3.amazonaws.com https://octoonboarding-sit.apps.nonprod2.mylab.local data: blob:; font-src 'self' data:; connect-src 'self' https://api-stage-octoconnect.mylab.local https://storage.googleapis.com https://*.googleusercontent.com https://api-experiment-octoconnect-stage.mylab.local data: blob:; frame-src 'self' https://storage.googleapis.com https://*.googleusercontent.com https://www.cimbniaga.co.id https://vbuat.cimbniaga.co.id:8443 https://id-production-cdn.zoloz.com; frame-ancestors 'self' https://eform-stage.cimbniaga.co.id https://wwwpre.octoclicks.co.id https://wwwstaging.cimbocto.co.id https://vbuat.cimbniaga.co.id:8443; base-uri 'self'; form-action 'self'"
+
+---
+
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: kpp-request-buffer-3m
+  namespace: nickstaging
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: kpp
+  requestBuffer:
+    limit: 3Mi
