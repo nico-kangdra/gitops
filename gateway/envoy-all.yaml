@@ -1,9 +1,41 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: external-proxy-config
+  namespace: gateway
+spec:
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyService:
+        annotations:
+          # service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+          # service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+          # service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: preserve_client_ip.enabled=true
+
+---
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: external-gatewayclass
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  parametersRef:
+    group: gateway.envoyproxy.io
+    kind: EnvoyProxy
+    name: external-proxy-config
+    namespace: gateway
+    
+---
+
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: external-gateway
   namespace: gateway
 spec:
+  gatewayClassName: external-gatewayclass
   listeners:
   - name: https
     protocol: HTTPS
