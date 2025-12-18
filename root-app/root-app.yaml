@@ -4,17 +4,19 @@ metadata:
   name: root-app
   namespace: argocd
 spec:
+  project: default
+
   destination:
-    namespace: argocd
     server: https://kubernetes.default.svc
+    namespace: argocd
+
   source:
-    path: apps
     repoURL: https://github.com/nico-kangdra/gitops.git
     targetRevision: main
+    path: apps
     directory:
       recurse: true
-  sources: []
-  project: default
+
   syncPolicy:
     automated:
       prune: true

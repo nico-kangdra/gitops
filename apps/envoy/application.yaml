@@ -13,7 +13,7 @@ spec:
         skipCrds: true
   destination:
     server: https://kubernetes.default.svc
-    namespace: envoy-dev
+    namespace: gateway
   syncPolicy:
     automated:
       prune: true
