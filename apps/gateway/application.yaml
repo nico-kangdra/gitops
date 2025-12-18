@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kangparkir-gateway
+  name: gateway
   namespace: argocd
 spec:
   project: default
   sources:
     - repoURL: https://github.com/nico-kangdra/gitops.git
       targetRevision: main
-      path: files
+      path: gateway
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:
